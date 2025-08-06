@@ -10,7 +10,7 @@ let
   pythonOverlay = final: prev: {
     python3 = prev.python3.override {
       packageOverrides = self: super: {
-        tomlkit = super.tomlkit.overridePythonAttrs(old: rec {
+        tomlkit = super.tomlkit.overridePythonAttrs (old: rec {
           version = "0.11.4";
           src = super.fetchPypi {
             inherit (old) pname;
@@ -27,7 +27,8 @@ in
 , poetry2nix ? pkgs.callPackage (import sources.poetry2nix) { }
 , avr ? true
 , arm ? true
-, teensy ? true }:
+, teensy ? true
+}:
 with pkgs;
 let
   avrlibc = pkgsCross.avr.libcCross;
@@ -49,15 +50,15 @@ let
   pythonEnv = poetry2nix.mkPoetryEnv {
     projectDir = ./util/nix;
     overrides = poetry2nix.overrides.withDefaults (self: super: {
-      pillow = super.pillow.overridePythonAttrs(old: {
+      pillow = super.pillow.overridePythonAttrs (old: {
         # Use preConfigure from nixpkgs to fix library detection issues and
         # impurities which can break the build process; this also requires
         # adding propagatedBuildInputs and buildInputs from the same source.
-        propagatedBuildInputs = (old.buildInputs or []) ++ pkgs.python3.pkgs.pillow.propagatedBuildInputs;
-        buildInputs = (old.buildInputs or []) ++ pkgs.python3.pkgs.pillow.buildInputs;
+        propagatedBuildInputs = (old.buildInputs or [ ]) ++ pkgs.python3.pkgs.pillow.propagatedBuildInputs;
+        buildInputs = (old.buildInputs or [ ]) ++ pkgs.python3.pkgs.pillow.buildInputs;
         preConfigure = (old.preConfigure or "") + pkgs.python3.pkgs.pillow.preConfigure;
       });
-      qmk = super.qmk.overridePythonAttrs(old: {
+      qmk = super.qmk.overridePythonAttrs (old: {
         # Allow QMK CLI to run "qmk" as a subprocess (the wrapper changes
         # $PATH and breaks these invocations).
         dontWrapPythonPrograms = true;
@@ -68,13 +69,13 @@ in
 mkShell {
   name = "qmk-firmware";
 
-  buildInputs = [ clang-tools dfu-programmer dfu-util diffutils git pythonEnv niv ]
+  buildInputs = [ clang-tools dfu-programmer dfu-util diffutils /* git */ pythonEnv niv ]
     ++ lib.optional avr [
-      pkgsCross.avr.buildPackages.binutils
-      pkgsCross.avr.buildPackages.gcc8
-      avrlibc
-      avrdude
-    ]
+    pkgsCross.avr.buildPackages.binutils
+    pkgsCross.avr.buildPackages.gcc8
+    avrlibc
+    avrdude
+  ]
     ++ lib.optional arm [ gcc-arm-embedded ]
     ++ lib.optional teensy [ teensy-loader-cli ];
 
