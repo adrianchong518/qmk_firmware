@@ -31,10 +31,10 @@ const uint8_t SCROLL_DIV_MAX = 7;
 
 const uint16_t AML_TIMEOUT_MIN = 100;
 const uint16_t AML_TIMEOUT_MAX = 1000;
-const uint16_t AML_TIMEOUT_QU  = 50;   // Quantization Unit
+const uint16_t AML_TIMEOUT_QU  = 50; // Quantization Unit
 
-static const char BL = '\xB0'; // Blank indicator character
-static const char LFSTR_ON[] PROGMEM = "\xB2\xB3";
+static const char BL                  = '\xB0'; // Blank indicator character
+static const char LFSTR_ON[] PROGMEM  = "\xB2\xB3";
 static const char LFSTR_OFF[] PROGMEM = "\xB4\xB5";
 
 keyball_t keyball = {
@@ -51,7 +51,7 @@ keyball_t keyball = {
     .scroll_mode = false,
     .scroll_div  = 0,
 
-    .pressing_keys = { BL, BL, BL, BL, BL, BL, 0 },
+    .pressing_keys = {BL, BL, BL, BL, BL, BL, 0},
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -167,16 +167,20 @@ void pointing_device_driver_set_cpi(uint16_t cpi) {
 }
 
 __attribute__((weak)) void keyball_on_apply_motion_to_mouse_move(keyball_motion_t *m, report_mouse_t *r, bool is_left) {
+    int16_t div = 1 << (KEYBALL_MOVE_DIV_DEFAULT - 1);
+    int16_t x   = divmod16(&m->x, div);
+    int16_t y   = divmod16(&m->y, div);
+
 #if KEYBALL_MODEL == 61 || KEYBALL_MODEL == 39 || KEYBALL_MODEL == 147 || KEYBALL_MODEL == 44
-    r->x = clip2int8(m->y);
-    r->y = clip2int8(m->x);
+    r->x = clip2int8(y);
+    r->y = clip2int8(x);
     if (is_left) {
         r->x = -r->x;
         r->y = -r->y;
     }
 #elif KEYBALL_MODEL == 46
-    r->x = clip2int8(m->x);
-    r->y = -clip2int8(m->y);
+    r->x        = clip2int8(x);
+    r->y        = -clip2int8(y);
 #else
 #    error("unknown Keyball model")
 #endif
@@ -187,21 +191,29 @@ __attribute__((weak)) void keyball_on_apply_motion_to_mouse_move(keyball_motion_
 
 __attribute__((weak)) void keyball_on_apply_motion_to_mouse_scroll(keyball_motion_t *m, report_mouse_t *r, bool is_left) {
     // consume motion of trackball.
+#ifndef POINTING_DEVICE_HIRES_SCROLL_ENABLE
     int16_t div = 1 << (keyball_get_scroll_div() - 1);
+#else
+    int16_t div = 1;
+#endif
     int16_t x = divmod16(&m->x, div);
     int16_t y = divmod16(&m->y, div);
 
     // apply to mouse report.
+#ifdef WHEEL_EXTENDED_REPORT
+    r->h = y;
+    r->v = -x;
+#else
+    r->h        = clip2int8(y);
+    r->v        = -clip2int8(x);
+#endif
+
 #if KEYBALL_MODEL == 61 || KEYBALL_MODEL == 39 || KEYBALL_MODEL == 147 || KEYBALL_MODEL == 44
-    r->h = clip2int8(y);
-    r->v = -clip2int8(x);
     if (is_left) {
         r->h = -r->h;
         r->v = -r->v;
     }
 #elif KEYBALL_MODEL == 46
-    r->h = clip2int8(x);
-    r->v = clip2int8(y);
 #else
 #    error("unknown Keyball model")
 #endif
@@ -412,7 +424,7 @@ void keyball_oled_render_ballinfo(void) {
     oled_write_P(PSTR("00 "), false);
 
     // indicate scroll snap mode: "VT" (vertical), "HO" (horizontal), and "SCR" (free)
-#if 1 && KEYBALL_SCROLLSNAP_ENABLE == 2
+#    if 1 && KEYBALL_SCROLLSNAP_ENABLE == 2
     switch (keyball_get_scrollsnap_mode()) {
         case KEYBALL_SCROLLSNAP_MODE_VERTICAL:
             oled_write_P(PSTR("VT"), false);
@@ -424,9 +436,9 @@ void keyball_oled_render_ballinfo(void) {
             oled_write_P(PSTR("\xBE\xBF"), false);
             break;
     }
-#else
+#    else
     oled_write_P(PSTR("\xBE\xBF"), false);
-#endif
+#    endif
     // indicate scroll mode: on/off
     if (keyball.scroll_mode) {
         oled_write_P(LFSTR_ON, false);
@@ -626,7 +638,7 @@ static void pressing_keys_update(uint16_t keycode, keyrecord_t *record) {
 }
 
 #ifdef POINTING_DEVICE_AUTO_MOUSE_ENABLE
-bool is_mouse_record_kb(uint16_t keycode, keyrecord_t* record) {
+bool is_mouse_record_kb(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         case SCRL_MO:
             return true;
@@ -683,8 +695,8 @@ bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
                 break;
             case KBC_SAVE: {
                 keyball_config_t c = {
-                    .cpi   = keyball.cpi_value,
-                    .sdiv  = keyball.scroll_div,
+                    .cpi  = keyball.cpi_value,
+                    .sdiv = keyball.scroll_div,
 #ifdef POINTING_DEVICE_AUTO_MOUSE_ENABLE
                     .amle  = get_auto_mouse_enable(),
                     .amlto = (get_auto_mouse_timeout() / AML_TIMEOUT_QU) - 1,
@@ -735,18 +747,14 @@ bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
             case AML_TO:
                 set_auto_mouse_enable(!get_auto_mouse_enable());
                 break;
-            case AML_I50:
-                {
-                    uint16_t v = get_auto_mouse_timeout() + 50;
-                    set_auto_mouse_timeout(MIN(v, AML_TIMEOUT_MAX));
-                }
-                break;
-            case AML_D50:
-                {
-                    uint16_t v = get_auto_mouse_timeout() - 50;
-                    set_auto_mouse_timeout(MAX(v, AML_TIMEOUT_MIN));
-                }
-                break;
+            case AML_I50: {
+                uint16_t v = get_auto_mouse_timeout() + 50;
+                set_auto_mouse_timeout(MIN(v, AML_TIMEOUT_MAX));
+            } break;
+            case AML_D50: {
+                uint16_t v = get_auto_mouse_timeout() - 50;
+                set_auto_mouse_timeout(MAX(v, AML_TIMEOUT_MIN));
+            } break;
 #endif
 
             default:

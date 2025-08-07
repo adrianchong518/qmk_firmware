@@ -54,7 +54,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /// in your config.h to be enable.  Please note that using this option will
 /// increase the firmware size by more than 4KB.
 //#define KEYBALL_PMW3360_UPLOAD_SROM_ID 0x04
-//#define KEYBALL_PMW3360_UPLOAD_SROM_ID 0x81
+// #define KEYBALL_PMW3360_UPLOAD_SROM_ID 0x81
 
 /// Defining this macro keeps two functions intact: keycode_config() and
 /// mod_config() in keycode_config.c.
@@ -111,9 +111,9 @@ enum keyball_keycodes {
 
     // Auto mouse layer control keycodes.
     // Only works when POINTING_DEVICE_AUTO_MOUSE_ENABLE is defined.
-    AML_TO   = QK_KB_10, // Toggle automatic mouse layer
-    AML_I50  = QK_KB_11, // Increment automatic mouse layer timeout
-    AML_D50  = QK_KB_12, // Decrement automatic mouse layer timeout
+    AML_TO  = QK_KB_10, // Toggle automatic mouse layer
+    AML_I50 = QK_KB_11, // Increment automatic mouse layer timeout
+    AML_D50 = QK_KB_12, // Decrement automatic mouse layer timeout
 
     // User customizable 32 keycodes.
     KEYBALL_SAFE_RANGE = QK_USER_0,
@@ -123,9 +123,9 @@ typedef union {
     uint32_t raw;
     struct {
         uint8_t cpi : 7;
-        uint8_t sdiv : 3;  // scroll divider
+        uint8_t sdiv : 3; // scroll divider
 #ifdef POINTING_DEVICE_AUTO_MOUSE_ENABLE
-        uint8_t amle : 1;  // automatic mouse layer enabled
+        uint8_t  amle : 1;  // automatic mouse layer enabled
         uint16_t amlto : 5; // automatic mouse layer timeout
 #endif
 #if KEYBALL_SCROLLSNAP_ENABLE == 2
