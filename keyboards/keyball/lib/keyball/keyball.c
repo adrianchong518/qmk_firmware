@@ -179,8 +179,8 @@ __attribute__((weak)) void keyball_on_apply_motion_to_mouse_move(keyball_motion_
         r->y = -r->y;
     }
 #elif KEYBALL_MODEL == 46
-    r->x        = clip2int8(x);
-    r->y        = -clip2int8(y);
+    r->x = clip2int8(x);
+    r->y = -clip2int8(y);
 #else
 #    error("unknown Keyball model")
 #endif
@@ -204,8 +204,8 @@ __attribute__((weak)) void keyball_on_apply_motion_to_mouse_scroll(keyball_motio
     r->h = y;
     r->v = -x;
 #else
-    r->h        = clip2int8(y);
-    r->v        = -clip2int8(x);
+    r->h = clip2int8(y);
+    r->v = -clip2int8(x);
 #endif
 
 #if KEYBALL_MODEL == 61 || KEYBALL_MODEL == 39 || KEYBALL_MODEL == 147 || KEYBALL_MODEL == 44

@@ -53,8 +53,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /// enabled high CPI setting or so.  Valid valus are 0x04 or 0x81.  Define this
 /// in your config.h to be enable.  Please note that using this option will
 /// increase the firmware size by more than 4KB.
-//#define KEYBALL_PMW3360_UPLOAD_SROM_ID 0x04
-// #define KEYBALL_PMW3360_UPLOAD_SROM_ID 0x81
+// #define KEYBALL_PMW3360_UPLOAD_SROM_ID 0x04
+//  #define KEYBALL_PMW3360_UPLOAD_SROM_ID 0x81
 
 /// Defining this macro keeps two functions intact: keycode_config() and
 /// mod_config() in keycode_config.c.
@@ -63,7 +63,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /// key code is disabled.  Therefore, Keyball automatically disables it.
 /// However, there may be cases where you still need these functions even after
 /// disabling the magic key code. In that case, define this macro.
-//#define KEYBALL_KEEP_MAGIC_FUNCTIONS
+// #define KEYBALL_KEEP_MAGIC_FUNCTIONS
 
 //////////////////////////////////////////////////////////////////////////////
 // Constants
