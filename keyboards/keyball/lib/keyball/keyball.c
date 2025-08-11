@@ -184,20 +184,13 @@ __attribute__((weak)) void keyball_on_apply_motion_to_mouse_move(keyball_motion_
 #else
 #    error("unknown Keyball model")
 #endif
-    // clear motion
-    m->x = 0;
-    m->y = 0;
 }
 
 __attribute__((weak)) void keyball_on_apply_motion_to_mouse_scroll(keyball_motion_t *m, report_mouse_t *r, bool is_left) {
     // consume motion of trackball.
-#ifndef POINTING_DEVICE_HIRES_SCROLL_ENABLE
     int16_t div = 1 << (keyball_get_scroll_div() - 1);
-#else
-    int16_t div = 1;
-#endif
-    int16_t x = divmod16(&m->x, div);
-    int16_t y = divmod16(&m->y, div);
+    int16_t x   = divmod16(&m->x, div);
+    int16_t y   = divmod16(&m->y, div);
 
     // apply to mouse report.
 #ifdef WHEEL_EXTENDED_REPORT
@@ -446,9 +439,12 @@ void keyball_oled_render_ballinfo(void) {
         oled_write_P(LFSTR_OFF, false);
     }
 
+#    ifdef POINTING_DEVICE_HIRES_SCROLL_ENABLE
+#    else
     // indicate scroll divider:
     oled_write_P(PSTR(" \xC0\xC1"), false);
     oled_write_char('0' + keyball_get_scroll_div(), false);
+#    endif
 #endif
 }
 

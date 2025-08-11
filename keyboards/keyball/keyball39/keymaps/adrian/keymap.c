@@ -34,10 +34,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ),
 
   [_NAV] = LAYOUT_right_ball(
-    XXXXXXX  , XXXXXXX  , XXXXXXX  , XXXXXXX  , KC_HOME  ,            KC_DOWN  , KC_RIGHT  , KC_BTN3   , XXXXXXX   , XXXXXXX  ,
-    KC_LGUI  , KC_LALT  , KC_LSFT  , KC_LCTL  , KC_END   ,            KC_LEFT  , KC_BTN1   , SCRL_MO   , KC_BTN2   , XXXXXXX  ,
-    KC_CAPS  , XXXXXXX  , XXXXXXX  , XXXXXXX  , XXXXXXX  ,            KC_UP    , SSNP_HOR  , SSNP_FRE  , SSNP_FRE  , XXXXXXX  ,
-    XXXXXXX  , XXXXXXX  , XXXXXXX  , _______  , _______  , XXXXXXX  , KC_BTN4  , KC_BTN5   ,                         XXXXXXX
+    SSNP_HOR  , SSNP_FRE  , SSNP_VRT  , _______  , KC_HOME  ,            KC_DOWN  , KC_RIGHT  , KC_BTN3  , _______  , _______  ,
+    KC_LGUI   , KC_LALT   , KC_LSFT   , KC_LCTL  , KC_END   ,            KC_LEFT  , KC_BTN1   , SCRL_MO  , KC_BTN2  , _______  ,
+    KC_CAPS   , _______   , _______   , _______  , _______  ,            KC_UP    , _______   , _______  , _______  , _______  ,
+    _______   , _______   , _______   , _______  , _______  , _______  , KC_BTN4  , KC_BTN5   ,                       _______
   ),
 
   [_SYM] = LAYOUT_right_ball(
@@ -56,7 +56,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
   [_NUM] = LAYOUT_right_ball(
     XXXXXXX  , XXXXXXX  , XXXXXXX  , XXXXXXX  , XXXXXXX  ,            XXXXXXX  , XXXXXXX   , KC_7  , KC_8  , KC_9     ,
-    KC_LGUI  , KC_LALT  , KC_LSFT  , KC_LCTL  , XXXXXXX  ,            XXXXXXX  , KC_DEL    , KC_4  , KC_5  , KC_6     ,
+    KC_LGUI  , KC_LALT  , KC_LSFT  , KC_LCTL  , XXXXXXX  ,            KC_DEL   , XXXXXXX   , KC_4  , KC_5  , KC_6     ,
     XXXXXXX  , XXXXXXX  , XXXXXXX  , XXXXXXX  , XXXXXXX  ,            XXXXXXX  , KC_0      , KC_1  , KC_2  , KC_3     ,
     XXXXXXX  , XXXXXXX  , XXXXXXX  , XXXXXXX  , XXXXXXX  , XXXXXXX  , _______  , XXXXXXX   ,                 XXXXXXX
   ),
