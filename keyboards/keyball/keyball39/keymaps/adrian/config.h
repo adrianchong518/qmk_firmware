@@ -33,9 +33,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #    define RGBLIGHT_EFFECT_TWINKLE
 #endif
 
+#define LAYER_STATE_16BIT
+
 #define TAP_CODE_DELAY 5
 #define TAPPING_TERM 200
 #define PERMISSIVE_HOLD
+
+#define BOTH_SHIFTS_TURNS_ON_CAPS_WORD
+#define CAPS_WORD_INVERT_ON_SHIFT
 
 #define OLED_DISABLE_TIMEOUT
 

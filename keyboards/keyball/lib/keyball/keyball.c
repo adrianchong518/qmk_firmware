@@ -439,12 +439,9 @@ void keyball_oled_render_ballinfo(void) {
         oled_write_P(LFSTR_OFF, false);
     }
 
-#    ifdef POINTING_DEVICE_HIRES_SCROLL_ENABLE
-#    else
     // indicate scroll divider:
     oled_write_P(PSTR(" \xC0\xC1"), false);
     oled_write_char('0' + keyball_get_scroll_div(), false);
-#    endif
 #endif
 }
 
