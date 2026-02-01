@@ -17,7 +17,11 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "action_layer.h"
+#include "config.h"
 #include "keyboard.h"
+#include "keycodes.h"
+#include "pointing_device_auto_mouse.h"
 #include QMK_KEYBOARD_H
 
 #include "quantum.h"
@@ -30,7 +34,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_Q          , KC_W          , KC_F          , KC_P          , KC_G                        , KC_J      , KC_L          , KC_U          , KC_Y          , KC_BSPC       ,
     LGUI_T(KC_A)  , LALT_T(KC_R)  , LSFT_T(KC_S)  , LCTL_T(KC_T)  , KC_D                        , KC_H      , RCTL_T(KC_N)  , RSFT_T(KC_E)  , RALT_T(KC_I)  , RGUI_T(KC_O)  ,
     KC_Z          , KC_X          , KC_C          , KC_V          , KC_B                        , KC_K      , KC_M          , KC_ESC        , KC_TAB        , KC_ENT        ,
-    XXXXXXX       , XXXXXXX       , XXXXXXX       , TO(_BASE)     , LT(_NAV,KC_SPC)  , XXXXXXX  , MO(_NUM)  , TO(_SYM)      ,                                 MO(_LAYERS)
+    MO(_LAYERS)   , XXXXXXX       , XXXXXXX       , TO(_BASE)     , LT(_NAV,KC_SPC)  , XXXXXXX  , MO(_NUM)  , TO(_SYM)      ,                                 TG(_NAV)
   ),
 
   [_FACTORIO] = LAYOUT_right_ball(
@@ -41,9 +45,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ),
 
   [_NAV] = LAYOUT_right_ball(
-    SSNP_HOR  , SSNP_FRE  , SSNP_VRT  , _______  , KC_HOME  ,            KC_DOWN  , KC_RIGHT  , KC_BTN3  , _______  , _______  ,
-    KC_LGUI   , KC_LALT   , KC_LSFT   , KC_LCTL  , KC_END   ,            KC_LEFT  , KC_BTN1   , SCRL_MO  , KC_BTN2  , _______  ,
-    KC_CAPS   , _______   , _______   , _______  , _______  ,            KC_UP    , _______   , _______  , _______  , _______  ,
+    SSNP_HOR  , SSNP_FRE  , SSNP_VRT  , _______  , KC_HOME  ,            KC_DOWN  , KC_RIGHT  , KC_BTN3  , _______  , _______   ,
+    KC_LGUI   , KC_LALT   , KC_LSFT   , KC_LCTL  , KC_END   ,            KC_LEFT  , KC_BTN1   , SCRL_MO  , KC_BTN2  , _______   ,
+    KC_CAPS   , _______   , _______   , _______  , _______  ,            KC_UP    , _______   , _______  , _______  , QK_USER_1 ,
     _______   , _______   , _______   , _______  , _______  , _______  , KC_BTN4  , KC_BTN5   ,                       _______
   ),
 
@@ -83,9 +87,7 @@ void keyboard_post_init_user(void) {
 }
 
 layer_state_t layer_state_set_user(layer_state_t state) {
-    // Auto enable scroll mode when the highest layer is 3
-    // keyball_set_scroll_mode(get_highest_layer(state) == 3);
-    return state;
+    get_highest_layer() return state;
 }
 
 layer_state_t default_layer_state_set_user(layer_state_t state) {
@@ -99,11 +101,29 @@ layer_state_t default_layer_state_set_user(layer_state_t state) {
     return state;
 }
 
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    static uint8_t prev_cpi_value;
+    switch (keycode) {
+        case QK_USER_1:
+            if (record->event.pressed) {
+                prev_cpi_value = keyball_get_cpi();
+                keyball_set_cpi(KEYBALL_CPI_SECONDARY / 100);
+            } else {
+                keyball_set_cpi(prev_cpi_value);
+            }
+            return false;
+
+        default:
+            break;
+    }
+
+    return true;
+}
+
 bool caps_word_press_user(uint16_t keycode) {
     switch (keycode) {
         // Keycodes that continue Caps Word, with shift applied.
         case KC_A ... KC_Z:
-        case KC_MINS:
             add_weak_mods(MOD_BIT(KC_LSFT)); // Apply shift to next key.
             return true;
 
@@ -111,6 +131,7 @@ bool caps_word_press_user(uint16_t keycode) {
         case KC_1 ... KC_0:
         case KC_BSPC:
         case KC_DEL:
+        case KC_MINS:
         case KC_UNDS:
             return true;
 
