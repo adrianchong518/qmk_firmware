@@ -45,16 +45,16 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ),
 
   [_NAV] = LAYOUT_right_ball(
-    SSNP_HOR  , SSNP_FRE  , SSNP_VRT  , _______  , KC_HOME  ,            KC_DOWN  , KC_RIGHT  , KC_BTN3  , _______  , _______   ,
-    KC_LGUI   , KC_LALT   , KC_LSFT   , KC_LCTL  , KC_END   ,            KC_LEFT  , KC_BTN1   , SCRL_MO  , KC_BTN2  , _______   ,
-    KC_CAPS   , _______   , _______   , _______  , _______  ,            KC_UP    , _______   , _______  , _______  , QK_USER_1 ,
-    _______   , _______   , _______   , _______  , _______  , _______  , KC_BTN4  , KC_BTN5   ,                       _______
+    _______   , _______   , _______   , _______  , KC_HOME  ,            KC_DOWN  , KC_RIGHT  , KC_BTN3  , _______  , _______   ,
+    KC_LGUI   , KC_LALT   , KC_LSFT   , KC_LCTL  , KC_END   ,            KC_LEFT  , KC_BTN1   , SCRL_MO  , KC_BTN2  , QK_USER_1 ,
+    KC_CAPS   , _______   , _______   , _______  , _______  ,            KC_UP    , KC_BTN4  , KC_BTN5   , _______  , _______   ,
+    _______   , _______   , _______   , _______  , _______  , _______  , _______  , _______   ,                       _______
   ),
 
   [_SYM] = LAYOUT_right_ball(
-    KC_LT    , KC_GT    , KC_LBRC  , KC_RBRC  , KC_TILD  ,            KC_ASTR  , KC_EQL   , KC_UNDS  , KC_SCLN  , KC_BSPC  ,
+    KC_LT    , KC_GT    , KC_LCBR  , KC_RCBR  , KC_TILD  ,            KC_ASTR  , KC_EQL   , KC_UNDS  , KC_SCLN  , KC_BSPC  ,
     KC_CIRC  , KC_DLR   , KC_LPRN  , KC_RPRN  , KC_AT    ,            KC_BSLS  , KC_COLN  , KC_MINS  , KC_QUOT  , KC_DQT   ,
-    KC_PERC  , KC_AMPR  , KC_LCBR  , KC_RCBR  , KC_HASH  ,            KC_EXLM  , KC_QUES  , KC_COMM  , KC_DOT   , KC_SLSH  ,
+    KC_PERC  , KC_AMPR  , KC_LBRC  , KC_RBRC  , KC_HASH  ,            KC_EXLM  , KC_QUES  , KC_COMM  , KC_DOT   , KC_SLSH  ,
     _______  , _______  , _______  , _______  , _______  , KC_LSFT  , _______  , TO(_FN)  ,                       XXXXXXX
   ),
 
@@ -84,10 +84,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 void keyboard_post_init_user(void) {
     set_auto_mouse_layer(_NAV);
     set_auto_mouse_enable(true);
+
+    keyball_set_scrollsnap_mode(KEYBALL_SCROLLSNAP_MODE_FREE);
 }
 
 layer_state_t layer_state_set_user(layer_state_t state) {
-    get_highest_layer() return state;
+    return state;
 }
 
 layer_state_t default_layer_state_set_user(layer_state_t state) {
