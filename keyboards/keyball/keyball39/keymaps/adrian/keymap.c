@@ -28,6 +28,30 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 enum keymaps { _BASE, _FACTORIO, _SYM, _FN, _LAYERS, _NUM, _NAV };
 
+#define TD_MT_TABLE(X) \
+    X(LGUI, CIRC)      \
+    X(LALT, DLR)       \
+    X(LSFT, LPRN)      \
+    X(LCTL, RPRN)      \
+    X(RCTL, COLN)      \
+    X(RGUI, DQT)
+
+enum td_keycodes {
+#define X_TD_KEYCODE(mod, key) mod##_##key,
+    TD_MT_TABLE(X_TD_KEYCODE)
+#undef X_TD_KEYCODE
+};
+
+typedef enum {
+    TD_NONE,
+    TD_UNKNOWN,
+    TD_SINGLE_TAP,
+    TD_SINGLE_HOLD,
+    TD_DOUBLE_SINGLE_TAP,
+} td_state_t;
+
+static td_state_t td_state;
+
 // clang-format off
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [_BASE] = LAYOUT_right_ball(
@@ -47,15 +71,15 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [_NAV] = LAYOUT_right_ball(
     _______   , _______   , _______   , _______  , KC_HOME  ,            KC_DOWN  , KC_RIGHT  , KC_BTN3  , _______  , _______   ,
     KC_LGUI   , KC_LALT   , KC_LSFT   , KC_LCTL  , KC_END   ,            KC_LEFT  , KC_BTN1   , SCRL_MO  , KC_BTN2  , QK_USER_1 ,
-    KC_CAPS   , _______   , _______   , _______  , _______  ,            KC_UP    , KC_BTN4  , KC_BTN5   , _______  , _______   ,
+    KC_CAPS   , _______   , _______   , _______  , _______  ,            KC_UP    , KC_BTN4   , KC_ESC   , KC_BTN5  , _______   ,
     _______   , _______   , _______   , _______  , _______  , _______  , _______  , _______   ,                       _______
   ),
 
   [_SYM] = LAYOUT_right_ball(
-    KC_LT    , KC_GT    , KC_LCBR  , KC_RCBR  , KC_TILD  ,            KC_ASTR  , KC_EQL   , KC_UNDS  , KC_SCLN  , KC_BSPC  ,
-    KC_CIRC  , KC_DLR   , KC_LPRN  , KC_RPRN  , KC_AT    ,            KC_BSLS  , KC_COLN  , KC_MINS  , KC_QUOT  , KC_DQT   ,
-    KC_PERC  , KC_AMPR  , KC_LBRC  , KC_RBRC  , KC_HASH  ,            KC_EXLM  , KC_QUES  , KC_COMM  , KC_DOT   , KC_SLSH  ,
-    _______  , _______  , _______  , _______  , _______  , KC_LSFT  , _______  , TO(_FN)  ,                       XXXXXXX
+    KC_LT         , KC_GT        , KC_LCBR       , KC_RCBR       , KC_TILD  ,            KC_ASTR  , KC_EQL        , KC_UNDS         , KC_SCLN         , KC_BSPC      ,
+    TD(LGUI_CIRC) , TD(LALT_DLR) , TD(LSFT_LPRN) , TD(LCTL_RPRN) , KC_AT    ,            KC_BSLS  , TD(RCTL_COLN) , RSFT_T(KC_MINS) , RALT_T(KC_QUOT) , TD(RGUI_DQT) ,
+    KC_PERC       , KC_AMPR      , KC_LBRC       , KC_RBRC       , KC_HASH  ,            KC_EXLM  , KC_QUES       , KC_COMM         , KC_DOT          , KC_SLSH      ,
+    _______       , _______      , _______       , _______       , _______  , _______  , _______  , TO(_FN)  ,                       XXXXXXX
   ),
 
   [_FN] = LAYOUT_right_ball(
@@ -80,6 +104,63 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ),
 };
 // clang-format on
+
+td_state_t cur_dance(tap_dance_state_t *state) {
+    if (state->count == 1) {
+        if (state->interrupted || !state->pressed)
+            return TD_SINGLE_TAP;
+        else
+            return TD_SINGLE_HOLD;
+    }
+
+    if (state->count == 2)
+        return TD_DOUBLE_SINGLE_TAP;
+    else
+        return TD_UNKNOWN;
+}
+
+#define X_TD_HANDLERS(mod, key)                                              \
+    void mod##_##key##_finished(tap_dance_state_t *state, void *user_data) { \
+        td_state = cur_dance(state);                                         \
+        switch (td_state) {                                                  \
+            case TD_SINGLE_TAP:                                              \
+                register_code16(KC_##key);                                   \
+                break;                                                       \
+            case TD_SINGLE_HOLD:                                             \
+                register_mods(MOD_BIT(KC_##mod));                            \
+                break;                                                       \
+            case TD_DOUBLE_SINGLE_TAP:                                       \
+                tap_code16(KC_##key);                                        \
+                register_code16(KC_##key);                                   \
+                break;                                                       \
+            default:                                                         \
+                break;                                                       \
+        }                                                                    \
+    }                                                                        \
+                                                                             \
+    void mod##_##key##_reset(tap_dance_state_t *state, void *user_data) {    \
+        switch (td_state) {                                                  \
+            case TD_SINGLE_TAP:                                              \
+                unregister_code16(KC_##key);                                 \
+                break;                                                       \
+            case TD_SINGLE_HOLD:                                             \
+                unregister_mods(MOD_BIT(KC_##mod));                          \
+                break;                                                       \
+            case TD_DOUBLE_SINGLE_TAP:                                       \
+                unregister_code16(KC_##key);                                 \
+                break;                                                       \
+            default:                                                         \
+                break;                                                       \
+        }                                                                    \
+    }
+TD_MT_TABLE(X_TD_HANDLERS)
+#undef X_TD_HANDLERS
+
+tap_dance_action_t tap_dance_actions[] = {
+#define X_TD_ACTION(mod, key) [mod##_##key] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, mod##_##key##_finished, mod##_##key##_reset),
+    TD_MT_TABLE(X_TD_ACTION)
+#undef X_TD_ACTION
+};
 
 void keyboard_post_init_user(void) {
     set_auto_mouse_layer(_NAV);
