@@ -76,7 +76,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ),
 
   [_SYM] = LAYOUT_right_ball(
-    KC_LT         , KC_GT        , KC_LCBR       , KC_RCBR       , KC_TILD  ,            KC_ASTR  , KC_EQL        , KC_UNDS         , KC_SCLN         , KC_BSPC      ,
+    KC_LT         , KC_GT        , KC_LCBR       , KC_RCBR       , KC_GRAVE ,            KC_ASTR  , KC_EQL        , KC_UNDS         , KC_SCLN         , KC_BSPC      ,
     TD(LGUI_CIRC) , TD(LALT_DLR) , TD(LSFT_LPRN) , TD(LCTL_RPRN) , KC_AT    ,            KC_BSLS  , TD(RCTL_COLN) , RSFT_T(KC_MINS) , RALT_T(KC_QUOT) , TD(RGUI_DQT) ,
     KC_PERC       , KC_AMPR      , KC_LBRC       , KC_RBRC       , KC_HASH  ,            KC_EXLM  , KC_QUES       , KC_COMM         , KC_DOT          , KC_SLSH      ,
     _______       , _______      , _______       , _______       , _______  , _______  , _______  , TO(_FN)  ,                       XXXXXXX
@@ -107,7 +107,15 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 td_state_t cur_dance(tap_dance_state_t *state) {
     if (state->count == 1) {
-        if (state->interrupted || !state->pressed)
+        if (state->interrupted) {
+            if (state->interrupting_keycode != KC_NO && state->interrupting_keycode < QK_BASIC_MAX) {
+                return TD_SINGLE_HOLD;
+            } else {
+                return TD_SINGLE_TAP;
+            }
+        }
+
+        if (!state->pressed)
             return TD_SINGLE_TAP;
         else
             return TD_SINGLE_HOLD;
