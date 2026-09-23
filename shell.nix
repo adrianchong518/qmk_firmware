@@ -3,5 +3,8 @@
 pkgs.mkShell {
   name = "qmk-firmware";
 
-  buildInputs = with pkgs; [ clang-tools qmk ];
+  buildInputs = with pkgs; [
+    clang-tools
+    (qmk.override { python3 = python313; })
+  ];
 }
